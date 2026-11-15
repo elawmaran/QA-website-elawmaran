@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bug Hunt · When creative skill meets logical skill</title>
+<meta name="description" content="A 2-minute QA game. Compare the design with the build and tap the bugs. Can you find all 15?">
+<meta property="og:title" content="Bug Hunt 🐞 Can you find all 15 bugs?">
+<meta property="og:description" content="When creative skill meets logical skill. A 2-minute QA game by Elamaran Sugumar.">
+<meta property="og:image" content="https://qa.elawmaran.tech/bughunt/og.jpg">
+<meta property="og:url" content="https://qa.elawmaran.tech/bughunt/">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{--navy:#0F2340;--navy2:#1F3A5F;--gold:#E8A926;--ivory:#F7F3E8;--ink:#14213D;--mute:#8FA3BF;--green:#2FBF71;--red:#E5484D;--teal:#22B8CF}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:Inter,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:radial-gradient(1200px 700px at 80% -10%,#26497a 0%,var(--navy) 55%) fixed;color:#fff;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer;border:0}
+.wrap{max-width:980px;margin:0 auto;padding:22px 16px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:900;font-size:22px;letter-spacing:-.01em}
+.brand span{color:var(--gold)}
+.tagline{font-size:13px;color:var(--mute);font-weight:600;letter-spacing:.04em}
+.hud{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 13px;font-weight:800;font-size:14px;white-space:nowrap}
+.chip b{color:var(--gold)}
+.chip.t b{color:var(--teal)}
+.chip.low{border-color:var(--red);animation:pulse .8s infinite}
+@keyframes pulse{50%{background:rgba(229,72,77,.25)}}
+/* screens */
+.screen{display:none}.screen.on{display:block}
+.hero{text-align:center;padding:36px 8px 10px}
+.hero .bug{font-size:64px;animation:wig 2.4s ease-in-out infinite;display:inline-block}
+@keyframes wig{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-4px)}}
+.hero h1{font-size:clamp(34px,7vw,58px);font-weight:900;letter-spacing:-.03em;line-height:1.02;margin:10px 0 12px}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p.lead{font-size:clamp(16px,2.6vw,20px);color:#cfdbea;max-width:620px;margin:0 auto;line-height:1.5}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:720px;margin:28px auto}
+.how div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px 12px;font-size:14px;line-height:1.4;color:#dbe4f0}
+.how b{display:block;font-size:26px;margin-bottom:4px}
+.legend{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:6px 0 24px}
+.tagC,.tagL{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px}
+.tagC{background:rgba(232,169,38,.16);color:var(--gold);border:1px solid rgba(232,169,38,.5)}
+.tagL{background:rgba(34,184,207,.14);color:var(--teal);border:1px solid rgba(34,184,207,.5)}
+.btn{display:inline-block;background:var(--gold);color:var(--navy);font-weight:900;font-size:18px;padding:16px 34px;border-radius:999px;box-shadow:0 10px 30px rgba(232,169,38,.35);transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.3);box-shadow:none}
+/* level */
+.lvlhead{display:flex;justify-content:space-between;align-items:flex-end;margin:20px 0 12px;gap:10px;flex-wrap:wrap}
+.lvlhead h2{font-size:clamp(20px,4vw,28px);font-weight:900;letter-spacing:-.02em}
+.lvlhead h2 small{display:block;font-size:13px;color:var(--gold);letter-spacing:.14em;font-weight:800;margin-bottom:4px}
+.lvlhead p{font-size:14px;color:var(--mute)}
+.boards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.board{position:relative}
+.label{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;letter-spacing:.14em;margin-bottom:8px}
+.label .d{color:var(--green)}.label .b{color:var(--red)}
+.label span.note{color:var(--mute);letter-spacing:.02em;font-weight:600}
+.frame{position:relative;width:100%;aspect-ratio:3/4;border-radius:22px;overflow:hidden;container-type:inline-size;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.frame.build{cursor:crosshair;outline:3px solid transparent;transition:outline-color .2s}
+.frame.build.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.mark{position:absolute;width:13cqw;height:13cqw;margin:-6.5cqw 0 0 -6.5cqw;border:3px solid var(--red);border-radius:50%;pointer-events:none;animation:pop .35s;box-shadow:0 0 0 4px rgba(229,72,77,.25)}
+.mark.c{border-color:var(--gold);box-shadow:0 0 0 4px rgba(232,169,38,.3)}
+.mark.l{border-color:var(--teal);box-shadow:0 0 0 4px rgba(34,184,207,.3)}
+.miss{position:absolute;font-weight:900;color:var(--red);font-size:6cqw;pointer-events:none;animation:up .7s forwards;transform:translate(-50%,-50%)}
+@keyframes pop{from{transform:scale(2.2);opacity:0}}
+@keyframes up{to{transform:translate(-50%,-180%);opacity:0}}
+.found{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.fitem{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.4;animation:slide .3s}
+@keyframes slide{from{opacity:0;transform:translateY(6px)}}
+.fitem .sev{font-size:11px;font-weight:900;letter-spacing:.08em;padding:3px 8px;border-radius:6px;white-space:nowrap;margin-top:1px}
+.sev.hi{background:var(--red)}.sev.md{background:#d9822b}.sev.lo{background:#5a6b85}
+.fitem .why{color:#c9d6e6}
+.slots{display:flex;gap:6px}
+.slots i{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.15);display:inline-block}
+.slots i.on{background:var(--gold)}
+.ctrl{display:flex;justify-content:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.hintbtn{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:10px 18px;font-weight:800;font-size:14px}
+.glow{animation:glow 1.2s 3}
+@keyframes glow{50%{box-shadow:0 0 0 6px rgba(232,169,38,.75)}}
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(6,14,28,.82);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;backdrop-filter:blur(4px)}
+.ov.on{display:flex}
+.card{background:var(--ivory);color:var(--ink);border-radius:26px;max-width:520px;width:100%;padding:28px 24px;text-align:center;animation:pop .35s}
+.card h3{font-size:28px;font-weight:900;letter-spacing:-.02em}
+.card p{color:#4a5263;margin:8px 0 18px;line-height:1.5}
+.big{font-size:64px;font-weight:900;color:var(--navy);letter-spacing:-.03em;line-height:1}
+.big small{font-size:28px;color:#8a8f9c}
+.rank{display:inline-block;background:var(--navy);color:var(--gold);font-weight:900;padding:8px 16px;border-radius:999px;margin:12px 0 4px;letter-spacing:.04em}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.split div{background:#fff;border-radius:16px;padding:14px 10px}
+.split b{font-size:30px;display:block}
+.split .c b{color:#B7821A}.split .l b{color:#1592a6}
+.split span{font-size:13px;font-weight:700;color:#5d6475}
+.bar{height:8px;border-radius:9px;background:#e8e1cd;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%}
+.card .btn{font-size:16px;padding:14px 22px;margin:4px}
+.card .btn.ghost{color:var(--navy);border-color:#c9c0a6}
+.by{margin-top:18px;font-size:13px;color:#6b7180}
+.by a{color:#B7821A;font-weight:800;text-decoration:none}
+.foot{text-align:center;margin-top:34px;font-size:13px;color:var(--mute)}
+.foot a{color:var(--gold);font-weight:800;text-decoration:none}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--gold);color:var(--navy);font-weight:900;padding:12px 18px;border-radius:999px;z-index:60;display:none}
+@media (max-width:640px){
+  .boards{grid-template-columns:1fr 1fr;gap:8px}
+  .label{font-size:10px;letter-spacing:.08em}.label span.note{display:none}
+  .frame{border-radius:14px}
+  .how{grid-template-columns:1fr}
+  .wrap{padding:16px 10px 34px}
+}
+
+/* ===== scene primitives (all sized in cqw so they scale) ===== */
+.sc{position:absolute;inset:0;font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif}
+.abs{position:absolute}
+/* slot */
+.slot{background:linear-gradient(180deg,#3b0a5c,#1a0630)}
+.slot .title{left:0;right:0;top:6cqw;text-align:center;font-weight:900;font-size:9cqw;color:#FFD54A;text-shadow:0 .6cqw 0 #b3122c;letter-spacing:.02em}
+.slot .reels{left:7cqw;right:7cqw;top:24cqw;height:34cqw;background:#fff;border-radius:4cqw;border:1.6cqw solid #FFD54A;display:flex;overflow:hidden}
+.slot .reel{flex:1;display:flex;align-items:center;justify-content:center;font-size:17cqw;font-weight:900;color:#d4142f;border-right:.6cqw solid #e5e5e5;position:relative}
+.slot .reel:last-child{border:0}
+.slot .win{left:7cqw;right:7cqw;top:63cqw;text-align:center;font-weight:900;font-size:8cqw;color:#7CFF9E}
+.slot .stats{left:7cqw;right:7cqw;top:78cqw;display:flex;justify-content:space-between;font-size:4.2cqw;color:#e9d7ff;font-weight:700}
+.slot .stats b{display:block;font-size:6cqw;color:#fff}
+.slot .spin{left:22cqw;right:22cqw;top:100cqw;height:17cqw;border-radius:9cqw;background:linear-gradient(180deg,#ffdf6b,#e6a400);color:#5a2a00;font-weight:900;font-size:7.4cqw;display:flex;align-items:center;justify-content:center;letter-spacing:.06em;box-shadow:0 1.2cqw 0 #a86c00}
+/* app */
+.app{background:#fff;color:#1b1f2a}
+.app .bar{left:0;right:0;top:0;height:8cqw;background:#f3f4f7}
+.app .logo{left:41cqw;top:15cqw;width:18cqw;height:18cqw;border-radius:5cqw;background:linear-gradient(135deg,#5b6cff,#8f5bff)}
+.app h4{left:0;right:0;top:38cqw;text-align:center;font-size:7.5cqw;font-weight:900}
+.app .sub{left:0;right:0;top:48cqw;text-align:center;font-size:4.2cqw;color:#7a8091}
+.app .fld{left:9cqw;right:9cqw;height:12cqw;border:.5cqw solid #d9dce3;border-radius:3cqw;padding:0 4cqw;display:flex;align-items:center;font-size:4.6cqw;color:#1b1f2a}
+.app .fld small{position:absolute;top:-4.6cqw;left:1cqw;font-size:3.4cqw;color:#7a8091;font-weight:700}
+.app .go{left:9cqw;right:9cqw;top:100cqw;height:13cqw;border-radius:3cqw;background:#5b6cff;color:#fff;font-weight:800;font-size:5.2cqw;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap}
+.app .fp{left:0;right:0;top:118cqw;text-align:center;font-size:4.2cqw;color:#5b6cff;font-weight:700}
+/* cart */
+.cart{background:#f6f7fb;color:#1b1f2a}
+.cart .hd{left:0;right:0;top:0;height:16cqw;background:#1b1f2a;color:#fff;font-weight:900;font-size:6cqw;display:flex;align-items:center;padding-left:6cqw}
+.cart .it{left:5cqw;right:5cqw;height:24cqw;background:#fff;border-radius:4cqw;box-shadow:0 .6cqw 2cqw rgba(0,0,0,.06)}
+.cart .im{position:absolute;left:4cqw;top:4cqw;width:16cqw;height:16cqw;border-radius:3cqw;display:flex;align-items:center;justify-content:center;font-size:10cqw}
+.cart .nm{position:absolute;left:24cqw;top:4.5cqw;font-weight:800;font-size:4.8cqw}
+.cart .pr{position:absolute;left:24cqw;top:11.5cqw;font-size:4cqw;color:#6b7180}
+.cart .qt{position:absolute;right:4cqw;top:4cqw;font-size:4cqw;font-weight:800;background:#eef0f6;border-radius:2cqw;padding:1cqw 2.6cqw}
+.cart .lt{position:absolute;right:4cqw;top:14cqw;font-weight:900;font-size:5cqw}
+.cart .tot{left:5cqw;right:5cqw;top:88cqw;display:flex;justify-content:space-between;font-weight:900;font-size:6.6cqw;border-top:.5cqw dashed #c9ccd6;padding-top:4cqw}
+.cart .pay{left:5cqw;right:5cqw;top:110cqw;height:14cqw;border-radius:4cqw;background:#ff7a1a;color:#fff;font-weight:900;font-size:5.6cqw;display:flex;align-items:center;justify-content:center}
+/* web */
+.web{background:#ffffff;color:#16181d}
+.web .nav{left:0;right:0;top:0;height:13cqw;display:flex;align-items:center;gap:4.4cqw;padding:0 5cqw;font-size:3.8cqw;font-weight:700;border-bottom:.4cqw solid #eee}
+.web .nav .lg{font-weight:900;font-size:5cqw;margin-right:auto;color:#0d8a5f}
+.web .hero{left:0;right:0;top:13cqw;height:62cqw;background:linear-gradient(135deg,#0d8a5f,#13b07a);color:#fff;padding:9cqw 6cqw}
+.web .hero h5{font-size:9cqw;font-weight:900;line-height:1.05;letter-spacing:-.02em}
+.web .hero p{font-size:4.2cqw;margin-top:3cqw;opacity:.9}
+.web .cta{left:6cqw;top:58cqw;width:40cqw;height:11cqw;border-radius:6cqw;background:#fff;color:#0d8a5f;font-weight:900;font-size:4.4cqw;display:flex;align-items:center;justify-content:center}
+.web .cards{left:5cqw;right:5cqw;top:82cqw;display:flex;gap:3cqw}
+.web .cards div{flex:1;height:26cqw;border-radius:3cqw;background:#f1f6f4;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:3.6cqw;font-weight:800;color:#2b3a33}
+.web .cards span{font-size:9cqw}
+.web .ft{left:0;right:0;bottom:0;height:12cqw;background:#16181d;color:#9aa3ad;font-size:3.6cqw;display:flex;align-items:center;justify-content:center}
+/* reward */
+.rw{background:radial-gradient(circle at 50% 30%,#2a3f78,#0b1430)}
+.rw .card2{left:8cqw;right:8cqw;top:16cqw;height:104cqw;background:#fff;border-radius:7cqw;color:#141a2e;overflow:hidden}
+.rw .ribbon{position:absolute;left:0;right:0;top:0;height:30cqw;background:linear-gradient(135deg,#ffb800,#ff6b3d)}
+.rw .gift{position:absolute;left:50%;top:13cqw;transform:translateX(-50%);width:28cqw;height:28cqw;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:15cqw;box-shadow:0 1.5cqw 4cqw rgba(0,0,0,.18)}
+.rw h6{position:absolute;left:0;right:0;top:47cqw;text-align:center;font-size:7.4cqw;font-weight:900}
+.rw .amt{position:absolute;left:0;right:0;top:57cqw;text-align:center;font-size:5.6cqw;font-weight:800;color:#ff6b3d}
+.rw .exp{position:absolute;left:0;right:0;top:67cqw;text-align:center;font-size:4cqw;color:#7a8091}
+.rw .claim{position:absolute;left:10cqw;right:10cqw;top:80cqw;height:14cqw;border-radius:7cqw;background:linear-gradient(90deg,#ff8a00,#ff4d6d);color:#fff;font-weight:900;font-size:5.6cqw;display:flex;align-items:center;justify-content:center;letter-spacing:.04em}
+.hot{position:absolute;z-index:3}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><div class="brand">Bug <span>Hunt</span> 🐞</div><div class="tagline">WHEN CREATIVE SKILL MEETS LOGICAL SKILL</div></div>
+    <div class="hud" id="hud" style="display:none">
+      <div class="chip">Level <b id="hLvl">1</b>/5</div>
+      <div class="chip t">⏱ <b id="hTime">40</b>s</div>
+      <div class="chip">🐞 <b id="hScore">0</b>/15</div>
+    </div>
+  </div>
+
+  <!-- START -->
+  <section class="screen on" id="sStart">
+    <div class="hero">
+      <div class="bug">🐞</div>
+      <h1>The design was perfect.<br><em>The build… not so much.</em></h1>
+      <p class="lead">You're the QA lead. Compare the approved <b>design</b> with what the team <b>shipped</b>, and tap every bug in the build before release.</p>
+      <div class="how">
+        <div><b>5</b>screens: casino slot, mobile app, shop cart, website, reward pop-up</div>
+        <div><b>3</b>hidden bugs per screen<br>40 seconds each</div>
+        <div><b>2</b>kinds of bugs, because great QA needs both</div>
+      </div>
+      <div class="legend"><span class="tagC">🎨 Creative eye</span><span class="tagL">🧠 Logic</span></div>
+      <button class="btn" id="startBtn">Start the hunt →</button>
+      <div class="foot" style="margin-top:22px">Takes about 2 minutes · works on phone &amp; laptop</div>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section class="screen" id="sPlay">
+    <div class="lvlhead">
+      <h2><small id="lTag">LEVEL 1 · CASINO SLOT</small><span id="lName">Lucky 7s</span></h2>
+      <div class="slots" id="slots"><i></i><i></i><i></i></div>
+    </div>
+    <div class="boards">
+      <div class="board">
+        <div class="label"><span class="d">✓ DESIGN</span><span class="note">approved</span></div>
+        <div class="frame" id="fDesign"></div>
+      </div>
+      <div class="board">
+        <div class="label"><span class="b">✗ BUILD</span><span class="note">tap the bugs here</span></div>
+        <div class="frame build" id="fBuild"></div>
+      </div>
+    </div>
+    <div class="ctrl"><button class="hintbtn" id="hintBtn">💡 Hint (−5s)</button></div>
+    <div class="found" id="found"></div>
+  </section>
+
+  <div class="foot">Made by <a href="https://qa.elawmaran.tech" target="_blank">Elamaran Sugumar</a> · QA Lead &amp; Creative Leader</div>
+</div>
+
+<!-- level done -->
+<div class="ov" id="ovLevel"><div class="card">
+  <div style="font-size:48px" id="lvIcon">✅</div>
+  <h3 id="lvTitle">Level cleared!</h3>
+  <p id="lvText"></p>
+  <button class="btn" id="nextBtn">Next level →</button>
+</div></div>
+
+<!-- final -->
+<div class="ov" id="ovEnd"><div class="card">
+  <div style="font-size:13px;font-weight:900;letter-spacing:.16em;color:#B7821A">RELEASE REPORT</div>
+  <div class="big" style="margin-top:10px"><span id="fScore">0</span><small>/15</small></div>
+  <div class="rank" id="fRank">QA Lead material</div>
+  <p id="fLine" style="margin-bottom:0"></p>
+  <div class="split">
+    <div class="c"><b id="fC">0/8</b><span>🎨 Creative eye</span><div class="bar"><i id="bC" style="background:#E8A926;width:0"></i></div></div>
+    <div class="l"><b id="fL">0/7</b><span>🧠 Logic</span><div class="bar"><i id="bL" style="background:#22B8CF;width:0"></i></div></div>
+  </div>
+  <button class="btn" id="shareBtn">Share on LinkedIn</button>
+  <button class="btn ghost" id="copyBtn">Copy my score</button>
+  <button class="btn ghost" id="againBtn">Play again</button>
+  <div class="by">Great products need both: an eye for what feels right, and logic for what must be right.<br><a href="https://qa.elawmaran.tech" target="_blank">See how I work → qa.elawmaran.tech</a></div>
+</div></div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const GAME_URL="https://qa.elawmaran.tech/bughunt/";
+const TIME=40;
+
+/* Each level: render(isBuild) returns scene HTML. Bugs: id, type c/l, sev, title, why, and where (x,y % of frame) for the mark.
+   In the build, buggy elements carry data-bug="id". */
+const LEVELS=[
+ {tag:"LEVEL 1 · CASINO SLOT",name:"Lucky 7s",bugs:[
+   {id:"a",t:"c",sev:"md",x:50,y:46,title:"Middle reel is misaligned",why:"One symbol sits lower than the others. Players notice instantly, and it looks broken."},
+   {id:"b",t:"l",sev:"hi",x:76,y:62,title:"Balance didn't deduct the bet",why:"1,000 − 10 bet + 500 win = 1,490, not 1,500. Money maths must be exact in casino software."},
+   {id:"c",t:"c",sev:"lo",x:50,y:81,title:"Typo on the SPIN button",why:"\"SPNI\". Small, but it's the most-tapped button on the screen."}],
+  render:b=>`<div class="sc slot">
+    <div class="abs title">LUCKY 7s</div>
+    <div class="abs reels"><div class="reel">7</div><div class="reel" ${b?'data-bug="a"':''}><span style="${b?'transform:translateY(9cqw)':''}">7</span></div><div class="reel">7</div></div>
+    <div class="abs win">WIN 500!</div>
+    <div class="abs stats"><div>BET<b>10</b></div><div style="text-align:center">WIN<b>500</b></div><div style="text-align:right" ${b?'data-bug="b"':''}>BALANCE<b>${b?'1,500':'1,490'}</b></div></div>
+    <div class="abs spin" ${b?'data-bug="c"':''}>${b?'SPNI':'SPIN'}</div></div>`},
+ {tag:"LEVEL 2 · MOBILE APP",name:"Login screen",bugs:[
+   {id:"a",t:"l",sev:"hi",x:50,y:65,title:"Password shown in plain text",why:"It should be masked (••••). A security bug, not just a visual one."},
+   {id:"b",t:"c",sev:"md",x:50,y:80,title:"Button text is cut off",why:"\"Log i…\" The label overflows the button. Always check text fits in every language."},
+   {id:"c",t:"l",sev:"md",x:50,y:92,title:"\"Forgot password?\" is missing",why:"No way to recover an account means locked-out users and support tickets."}],
+  render:b=>`<div class="sc app">
+    <div class="abs bar"></div><div class="abs logo"></div>
+    <h4 class="abs">Welcome back</h4><div class="abs sub">Sign in to continue</div>
+    <div class="abs fld" style="top:62cqw"><small>EMAIL</small>maya@mail.com</div>
+    <div class="abs fld" style="top:82cqw" ${b?'data-bug="a"':''}><small>PASSWORD</small>${b?'Summer@2026':'••••••••••'}</div>
+    <div class="abs go" ${b?'data-bug="b" style="font-size:7.6cqw;justify-content:flex-start;padding-left:30cqw"':''}>${b?'Log in to account':'Log in'}</div>
+    ${b?'<div class="hot" data-bug="c" style="left:20%;right:20%;top:87%;height:10%"></div>':'<div class="abs fp">Forgot password?</div>'}</div>`},
+ {tag:"LEVEL 3 · SHOPPING CART",name:"Checkout",bugs:[
+   {id:"a",t:"l",sev:"hi",x:50,y:71,title:"Total is wrong",why:"2,400 + 300 = 2,700, not 2,600. The customer would be charged the wrong amount."},
+   {id:"b",t:"l",sev:"md",x:83,y:41,title:"Quantity can go negative",why:"\"−1\" should never be allowed. Input validation was missed."},
+   {id:"c",t:"c",sev:"lo",x:20,y:24,title:"Product image overlaps the text",why:"The headphones icon spills over the product name. A layout bug."}],
+  render:b=>`<div class="sc cart">
+    <div class="abs hd">🛒 Your cart</div>
+    <div class="abs it" style="top:22cqw"><div class="im" style="background:#ffe9d6;${b?'left:8cqw;width:24cqw;font-size:16cqw;z-index:2;background:transparent':''}" ${b?'data-bug="c"':''}>🎧</div><div class="nm">Headphones</div><div class="pr">₹1,200 each</div><div class="qt">× 2</div><div class="lt">₹2,400</div></div>
+    <div class="abs it" style="top:51cqw"><div class="im" style="background:#e3f0ff">🔌</div><div class="nm">USB cable</div><div class="pr">₹300 each</div><div class="qt" ${b?'data-bug="b" style="color:#d4142f"':''}>× ${b?'−1':'1'}</div><div class="lt">₹300</div></div>
+    <div class="abs tot" ${b?'data-bug="a"':''}><span>Total</span><span>${b?'₹2,600':'₹2,700'}</span></div>
+    <div class="abs pay">Pay now</div></div>`},
+ {tag:"LEVEL 4 · WEBSITE",name:"Landing page",bugs:[
+   {id:"a",t:"c",sev:"md",x:50,y:37,title:"Unreadable heading",why:"Dark green text on a green background. Contrast fails accessibility, and nobody can read it."},
+   {id:"b",t:"c",sev:"lo",x:63,y:7,title:"Menu item duplicated",why:"\"About\" appears twice in the navigation."},
+   {id:"c",t:"l",sev:"md",x:50,y:96,title:"Copyright year is 2062",why:"Should be 2026. Dates and years are classic logic slips."}],
+  render:b=>`<div class="sc web">
+    <div class="abs nav"><span class="lg">Greenly</span><span>Home</span><span ${b?'data-bug="b"':''}>About</span>${b?'<span data-bug="b">About</span>':'<span>Shop</span>'}</div>
+    <div class="abs hero" ${b?'data-bug="a"':''}><h5 style="${b?'color:#0f8a60':''}">Grow more.<br>Waste less.</h5><p>Smart gardening for every home.</p></div>
+    <div class="abs cta">Get started</div>
+    <div class="abs cards"><div><span>🌱</span>Seeds</div><div><span>💧</span>Water</div><div><span>☀️</span>Light</div></div>
+    <div class="abs ft" ${b?'data-bug="c"':''}>© ${b?'2062':'2026'} Greenly</div></div>`},
+ {tag:"LEVEL 5 · CASINO REWARD",name:"Bonus pop-up",bugs:[
+   {id:"a",t:"l",sev:"hi",x:50,y:56,title:"Expiry is in the past",why:"\"Expires in −2 days\". The reward is expired before the player can use it."},
+   {id:"b",t:"c",sev:"md",x:50,y:30,title:"Gift icon is cropped",why:"The icon is cut off at the top. Visual polish matters most at reward moments."},
+   {id:"c",t:"c",sev:"md",x:50,y:69,title:"Claim button looks disabled",why:"A grey button signals \"you can't tap\". Players may never claim their reward."}],
+  render:b=>`<div class="sc rw"><div class="abs card2">
+    <div class="ribbon"></div>
+    <div class="gift" ${b?'data-bug="b" style="top:2cqw;height:20cqw;overflow:hidden;align-items:flex-end"':''}>🎁</div>
+    <h6>Congratulations!</h6>
+    <div class="amt">You won 50 Free Spins</div>
+    <div class="exp" ${b?'data-bug="a" style="color:#d4142f;font-weight:800"':''}>Expires in ${b?'−2':'7'} days</div>
+    <div class="claim" ${b?'data-bug="c" style="background:#c9ccd3;color:#f4f5f7"':''}>CLAIM NOW</div></div></div>`},
+];
+
+let lvl=0,score=0,cScore=0,lScore=0,found={},time=TIME,timer=null,playing=false;
+const fD=$("#fDesign"),fB=$("#fBuild");
+
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));$(id).classList.add("on");}
+function start(){lvl=0;score=0;cScore=0;lScore=0;$("#hud").style.display="flex";show("#sPlay");load();window.scrollTo(0,0);}
+function load(){
+  const L=LEVELS[lvl];found={};time=TIME;playing=true;
+  $("#lTag").textContent=L.tag;$("#lName").textContent=L.name;$("#hLvl").textContent=lvl+1;
+  fD.innerHTML=L.render(false);fB.innerHTML=L.render(true);
+  $("#found").innerHTML="";$("#slots").innerHTML="<i></i><i></i><i></i>";
+  $("#hintBtn").disabled=false;
+  updHud();clearInterval(timer);timer=setInterval(tick,1000);
+}
+function updHud(){$("#hTime").textContent=time;$("#hScore").textContent=score;$("#hTime").parentElement.classList.toggle("low",time<=10);}
+function tick(){if(!playing)return;time--;updHud();if(time<=0)endLevel(false);}
+
+fB.addEventListener("click",e=>{
+  if(!playing)return;
+  const r=fB.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;
+  const el=e.target.closest("[data-bug]");
+  if(el&&!found[el.dataset.bug]){hit(el.dataset.bug);return;}
+  if(el&&found[el.dataset.bug])return;
+  // miss
+  const m=document.createElement("div");m.className="miss";m.textContent="−2s";m.style.left=x+"%";m.style.top=y+"%";fB.appendChild(m);setTimeout(()=>m.remove(),700);
+  fB.classList.remove("shake");void fB.offsetWidth;fB.classList.add("shake");
+  time=Math.max(0,time-2);updHud();if(time<=0)endLevel(false);
+});
+function pos(id,bug){const el=fB.querySelector(`[data-bug="${id}"]`);if(!el)return[bug.x,bug.y];const f=fB.getBoundingClientRect(),r=el.getBoundingClientRect();return[(r.left+r.width/2-f.left)/f.width*100,(r.top+r.height/2-f.top)/f.height*100];}
+function hit(id){
+  const L=LEVELS[lvl],bug=L.bugs.find(b=>b.id===id);found[id]=1;score++;bug.t==="c"?cScore++:lScore++;
+  const m=document.createElement("div");m.className="mark "+bug.t;const[px,py]=pos(id,bug);m.style.left=px+"%";m.style.top=py+"%";fB.appendChild(m);
+  const n=Object.keys(found).length;$("#slots").children[n-1].classList.add("on");
+  addFound(bug);updHud();
+  if(n===L.bugs.length)setTimeout(()=>endLevel(true),650);
+}
+function addFound(bug,missed){
+  const d=document.createElement("div");d.className="fitem";d.style.opacity=missed?.7:1;
+  const sev={hi:"HIGH",md:"MEDIUM",lo:"LOW"}[bug.sev];
+  d.innerHTML=`<span class="sev ${bug.sev}">${sev}</span><div><b>${missed?"Missed: ":""}${bug.title}</b> <span class="${bug.t==="c"?"tagC":"tagL"}" style="padding:2px 8px;font-size:11px;margin-left:4px">${bug.t==="c"?"🎨 Creative eye":"🧠 Logic"}</span><div class="why">${bug.why}</div></div>`;
+  $("#found").prepend(d);
+}
+$("#hintBtn").onclick=()=>{
+  if(!playing)return;const L=LEVELS[lvl];const left=L.bugs.find(b=>!found[b.id]);if(!left)return;
+  const el=fB.querySelector(`[data-bug="${left.id}"]`);if(el){el.classList.remove("glow");void el.offsetWidth;el.classList.add("glow");}
+  time=Math.max(1,time-5);updHud();
+};
+function endLevel(all){
+  if(!playing)return;playing=false;clearInterval(timer);
+  const L=LEVELS[lvl];
+  L.bugs.filter(b=>!found[b.id]).forEach(b=>{addFound(b,true);const m=document.createElement("div");m.className="mark";const[px,py]=pos(b.id,b);m.style.left=px+"%";m.style.top=py+"%";m.style.borderStyle="dashed";fB.appendChild(m);});
+  const n=Object.keys(found).length;
+  $("#lvIcon").textContent=all?"✅":"⏱";
+  $("#lvTitle").textContent=all?(time>=25?"Flawless. Release approved!":"Level cleared!"):"Time's up!";
+  $("#lvText").textContent=all?`You found all 3 bugs with ${time}s to spare.`:`You found ${n} of 3. The missed ones are marked in the build. Check the list below.`;
+  $("#nextBtn").textContent=lvl<LEVELS.length-1?"Next level →":"See my release report →";
+  setTimeout(()=>$("#ovLevel").classList.add("on"),all?0:900);
+}
+$("#nextBtn").onclick=()=>{$("#ovLevel").classList.remove("on");if(lvl<LEVELS.length-1){lvl++;load();window.scrollTo({top:0,behavior:"smooth"});}else finish();};
+function finish(){
+  const tc=LEVELS.flatMap(l=>l.bugs).filter(b=>b.t==="c").length,tl=15-tc;
+  $("#fScore").textContent=score;$("#fC").textContent=`${cScore}/${tc}`;$("#fL").textContent=`${lScore}/${tl}`;
+  setTimeout(()=>{$("#bC").style.width=(cScore/tc*100)+"%";$("#bL").style.width=(lScore/tl*100)+"%";},100);
+  $("#bC").style.transition=$("#bL").style.transition="width 1s";
+  const rank=score===15?"🏆 Release Guardian":score>=12?"⭐ QA Lead material":score>=8?"🔍 Sharp-eyed tester":"🌱 Rookie bug hunter";
+  $("#fRank").textContent=rank;
+  const cp=cScore/tc,lp=lScore/tl;
+  $("#fLine").textContent=Math.abs(cp-lp)<.15?"Balanced! You spot what looks wrong and what is wrong. That's the full QA skill set.":cp>lp?"Your creative eye is strong. Sharpen the logic side: check numbers, dates and rules.":"Your logic is sharp. Train your eye for layout, contrast and polish too.";
+  $("#ovEnd").classList.add("on");$("#hud").style.display="none";
+}
+function shareText(){return `I found ${score}/15 bugs in Bug Hunt 🐞 (${$("#fRank").textContent.replace(/^\S+\s/,"")}).\nWhen creative skill meets logical skill. Can you beat my score?\n${GAME_URL}`;}
+$("#shareBtn").onclick=()=>{window.open("https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(GAME_URL),"_blank");copy(true);};
+$("#copyBtn").onclick=()=>copy();
+function copy(quiet){const t=shareText();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast(quiet?"Score copied. Paste it in your post!":"Copied!")).catch(()=>{prompt("Copy your score:",t)});}
+function toast(m){const t=$("#toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",2200);}
+$("#againBtn").onclick=()=>{$("#ovEnd").classList.remove("on");start();};
+$("#startBtn").onclick=start;
+})();
+</script>
+</body>
+</html>
