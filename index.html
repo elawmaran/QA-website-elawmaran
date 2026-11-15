@@ -185,23 +185,80 @@ details.lvl summary::-webkit-details-marker{display:none}
 .lvl li{margin:4px 0}
 @media (max-width:600px){details.lvl summary{grid-template-columns:56px 1fr}.lvl summary .yr{grid-column:2}.lvl ul{margin-left:20px}}
 
-/* go / no-go */
-.gng{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:40px}
-.toggles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.tg{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--floor-2);border:1px solid rgba(154,166,188,.16);border-radius:14px;padding:16px 18px;font:600 15px var(--body);color:var(--ivory);cursor:pointer;text-align:left}
-.tg .sw{flex:none;width:46px;height:26px;border-radius:999px;background:#2A3347;position:relative;transition:background .2s}
-.tg .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#C9CFDB;transition:transform .2s}
-.tg[aria-checked="true"]{border-color:rgba(51,209,122,.45)}
-.tg[aria-checked="true"] .sw{background:var(--go)}
-.tg[aria-checked="true"] .sw::after{transform:translateX(20px);background:#fff}
-.lamp{background:#05080F;border:1px solid var(--line);border-radius:22px;padding:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
-.bulb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ffb3b3,var(--stop) 50%,#7a1010);box-shadow:0 0 50px rgba(255,90,90,.55);transition:all .4s}
-.lamp.go .bulb{background:radial-gradient(circle at 40% 35%,#c8ffdd,var(--go) 50%,#0d6b37);box-shadow:0 0 60px rgba(51,209,122,.7)}
-.lamp .verdict{font:900 44px/1 var(--display);letter-spacing:.06em;color:var(--stop)}
-.lamp.go .verdict{color:var(--go)}
-.lamp .meta{font:600 13px var(--mono);color:var(--mute)}
-.lamp .btn{padding:8px 16px;font-size:13px}
-@media (max-width:900px){.gng{grid-template-columns:1fr}.toggles{grid-template-columns:1fr}}
+/* spot the bug */
+.sb{display:grid;grid-template-columns:1fr 290px;gap:22px;margin-top:30px}
+.sb-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.sb-tabs{display:flex;gap:6px;background:#05080F;border:1px solid var(--line);border-radius:999px;padding:4px}
+.sb-tabs button{border:0;background:none;color:var(--mute);font:700 13px var(--body);padding:7px 14px;border-radius:999px;cursor:pointer}
+.sb-tabs button.on{background:var(--gold);color:#1a1205}
+.sb-tabs button.done::after{content:" ✓"}
+.sb-hud{display:flex;gap:8px;margin-left:auto}
+.sb-hud span{background:#05080F;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:700 13px var(--mono);color:var(--mute)}
+.sb-hud b{color:var(--gold);font-variant-numeric:tabular-nums}
+.sb-stage{position:relative;border-radius:20px;border:1px solid var(--line);background:radial-gradient(ellipse at 50% 0%,#17223A,#0A0F1C 70%);min-height:400px;display:grid;place-items:center;padding:22px;overflow:hidden;user-select:none;-webkit-user-select:none}
+.sb-scene{position:relative;cursor:crosshair}
+.sb>div{min-width:0}#sbScene{max-width:100%;min-width:0;display:flex;justify-content:center}
+.sb-bug{cursor:crosshair;position:relative}
+.sb-bug.found{outline:3px solid var(--go);outline-offset:3px;border-radius:6px}
+.sb-bug.missed{outline:3px dashed var(--stop);outline-offset:3px;border-radius:6px}
+.sb-pin{position:absolute;z-index:4;pointer-events:none;background:#05080F;border:1px solid var(--go);color:#D8F5E4;font:600 11.5px var(--body);padding:5px 8px;border-radius:8px;max-width:210px;line-height:1.3;box-shadow:0 8px 20px -8px #000;animation:pinIn .25s ease-out}
+.sb-pin b{color:var(--go);font:700 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;display:block}
+.sb-pin.miss{border-color:var(--stop);color:#FFD1D1}.sb-pin.miss b{color:var(--stop)}
+@keyframes pinIn{from{transform:scale(.6);opacity:0}}
+.sb-x{position:absolute;z-index:5;pointer-events:none;color:var(--stop);font:900 22px var(--mono);animation:up .6s ease-out forwards}
+.sb-over{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:24px;background:rgba(9,14,26,.88);backdrop-filter:blur(4px)}
+.sb-over h3{font-size:34px;font-weight:900;text-transform:uppercase;line-height:1.05}
+.sb-over p{margin:0;color:#D8D1C0;max-width:46ch}
+.sb-over .big{font:700 52px/1 var(--mono);color:var(--gold)}
+.sb-side{background:var(--floor-2);border:1px solid rgba(154,166,188,.14);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;align-self:start}
+.sb-side .who{display:flex;align-items:center;gap:10px}
+.sb-side .who img{width:44px;height:44px;border-radius:50%;border:2px solid var(--gold)}
+.sb-side .who b{display:block;font:800 18px var(--display);text-transform:uppercase;letter-spacing:.04em}
+.sb-side .who span{font-size:12px;color:var(--mute)}
+.sb-side blockquote{margin:0;padding-left:12px;border-left:3px solid var(--gold);color:#E6DECB;font-size:14.5px;line-height:1.5}
+.sb-found{list-style:none;margin:0;padding:0;font-size:13px;color:#D8D1C0}
+.sb-found li{padding:5px 0;border-bottom:1px dashed rgba(154,166,188,.15)}
+.sb-found li::before{content:"● ";color:var(--go)}
+/* slot mock */
+.m-slot{width:420px;max-width:100%;background:linear-gradient(180deg,#3a1e5c,#1a0d2e);border:4px solid #E9B444;border-radius:18px;padding:14px;color:#fff;font-family:var(--body)}
+.m-slot .ttl{text-align:center;font:900 26px var(--display);letter-spacing:.08em;color:#FFE49A;text-shadow:0 2px 0 #7a4b0c}
+.m-reels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#0d0618;padding:8px;border-radius:10px;margin:10px 0}
+.m-reels div{background:#fff8ea;border-radius:8px;height:86px;display:grid;place-items:center;font:900 46px var(--display);color:#C81E52}
+.m-reels div.tilt{transform:translate(6px,10px) rotate(6deg)}
+.m-row{display:flex;justify-content:space-between;align-items:center;gap:8px;font:700 13px var(--mono)}
+.m-row .lab{font-size:10px;color:#C8B8E8;letter-spacing:.12em}
+.m-win{text-align:center;font:900 22px var(--display);color:#7CF2A9;margin:6px 0}
+.m-spin{background:linear-gradient(180deg,#5FE08F,#1F8F55);border:0;color:#fff;font:900 18px var(--display);letter-spacing:.06em;border-radius:999px;width:96px;height:44px;overflow:hidden;white-space:nowrap}
+.m-pay{font:600 11px var(--mono);color:#C8B8E8;text-align:center;margin-top:8px}
+/* mobile mock */
+.m-phone{width:250px;background:#111;border-radius:34px;padding:12px;border:2px solid #333}
+.m-screen{background:#F4F6FA;border-radius:24px;overflow:hidden;color:#1B2333;font-family:var(--body);min-height:440px}
+.m-bar{display:flex;align-items:center;gap:10px;padding:14px;background:#fff;border-bottom:1px solid #E3E6EC;font:700 15px var(--body)}
+.m-bell{margin-left:auto;position:relative;font-size:18px}
+.m-bell i{position:absolute;top:-6px;right:-10px;background:#E5484D;color:#fff;font:700 10px var(--mono);font-style:normal;border-radius:99px;padding:1px 5px}
+.m-card{margin:12px;background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.m-card h4{margin:0 0 4px;font-size:15px}
+.m-card p{margin:0;font-size:12.5px;color:#5B6474}
+.m-dark{background:#1B2333;color:#1F2a3d;font-weight:700}
+.m-btn{display:block;width:calc(100% - 24px);margin:12px;background:#2E6BE6;color:#fff;border:0;border-radius:12px;padding:12px;font:700 14px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* web mock */
+.m-web{width:520px;max-width:100%;background:#fff;border-radius:12px;overflow:hidden;color:#1B2333;font-family:var(--body);box-shadow:0 20px 50px -20px #000}
+.m-chrome{background:#E9ECF1;padding:8px 10px;display:flex;gap:6px;align-items:center}
+.m-chrome i{width:10px;height:10px;border-radius:50%;background:#C7CCD6;display:inline-block}
+.m-chrome span{margin-left:10px;background:#fff;border-radius:6px;padding:3px 10px;font:500 11px var(--mono);color:#5B6474;flex:1}
+.m-nav{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #E3E6EC;font:700 14px var(--body)}
+.m-nav input{margin-left:auto;border:1px solid #CBD2DD;border-radius:8px;padding:6px 10px;font:13px var(--body);width:150px}
+.m-hero{display:grid;grid-template-columns:1fr 150px;gap:14px;padding:16px}
+.m-hero h4{margin:0 0 6px;font-size:20px}
+.m-hero p{margin:0 0 10px;font-size:13px;color:#5B6474}
+.m-img{height:110px;border:2px dashed #CBD2DD;border-radius:8px;display:grid;place-items:center;color:#8A93A3;font:600 12px var(--mono);text-align:center}
+.m-price{display:flex;gap:10px;padding:0 16px 14px}
+.m-price div{flex:1;border:1px solid #E3E6EC;border-radius:10px;padding:10px;font-size:12.5px}
+.m-price b{display:block;font-size:17px}
+.m-foot{background:#F4F6FA;padding:10px 16px;font:500 11px var(--mono);color:#8A93A3;display:flex;justify-content:space-between}
+@media (max-width:900px){.sb{grid-template-columns:1fr}.sb-hud{margin-left:0}}
+@media (max-width:560px){.m-web{width:100%;min-width:0}.m-price{flex-wrap:wrap}.m-nav{flex-wrap:wrap}.m-hero{grid-template-columns:1fr}.m-img{height:70px}.m-nav input{width:110px}.m-slot{width:100%}.m-reels div{height:66px;font-size:36px}.sb-stage{padding:12px;min-height:360px}}
+.sb-lbl{font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
 
 /* expertise cards */
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
@@ -270,9 +327,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   <div class="wrap">
     <a class="brand" href="#top"><img src="data:image/jpeg;base64,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" alt="Elamaran Sugumar, QA Lead">Elamaran S.</a>
     <div class="links">
-      <a href="#ebs">EBS</a><a href="#operators">Operators</a><a href="#career">Career</a><a href="#release">Go / No-Go</a><a href="#expertise">Expertise</a><a href="#work">Work</a>
+      <a href="#ebs">EBS</a><a href="#operators">Operators</a><a href="#career">Career</a><a href="#release">Spot the bug</a><a href="#expertise">Expertise</a><a href="#work">Work</a>
     </div>
-    <a class="btn" href="#contact">Let's talk QA</a>
+    <a class="btn" href="#contact">Let's talk</a>
   </div>
 </nav>
 
@@ -332,7 +389,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   <div class="wrap">
     <div class="ebs-head">
       <div>
-        <div class="eyebrow">Featured product · 2022 – 2026</div>
+        <div class="eyebrow">Featured product · 2023 – 2026</div>
         <h2>Elite Bonusing Suite <em>QA Lead</em></h2>
       </div>
       <div>
@@ -413,9 +470,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
     <h2>Seven levels, <em>artist to QA lead</em></h2>
     <p class="lede">Art and multimedia roles gave me a player's eye for visual quality. QA leadership turned that into release discipline. Open any level for details.</p>
     <div class="levels">
-      <details class="lvl top" open><summary><span class="lv">7</span><h3>Advanced Software QA Engineer, EBS Game Application<span class="co">Light &amp; Wonder / LNW India Solutions</span></h3><span class="yr">2022 – 2026</span></summary>
+      <details class="lvl top" open><summary><span class="lv">7</span><h3>Advanced Software QA Engineer, EBS Game Application<span class="co">Light &amp; Wonder / LNW India Solutions</span></h3><span class="yr">2023 – 2026</span></summary>
         <ul><li>Led QA for EBS / Elite Bonus Games casino applications, from test strategy to release readiness.</li><li>Owned the defect lifecycle and gave product and engineering clear visibility of release risk.</li><li>Applied Python, Playwright, Cypress and AI-assisted test design to cut repetitive manual effort.</li></ul></details>
-      <details class="lvl"><summary><span class="lv">6</span><h3>Associate Manager, Software QA Engineering<span class="co">Light &amp; Wonder</span></h3><span class="yr">2021 – 2022</span></summary>
+      <details class="lvl"><summary><span class="lv">6</span><h3>Associate Manager, Software QA Engineering<span class="co">Light &amp; Wonder</span></h3><span class="yr">2021 – 2023</span></summary>
         <ul><li>Led day-to-day QA across software and casino gaming workstreams, balancing priorities and capacity.</li><li>Mentored QA engineers on test design, coverage and defect quality.</li><li>Introduced shift-left reviews of requirements and acceptance criteria.</li></ul></details>
       <details class="lvl"><summary><span class="lv">5</span><h3>Supervisor, Game Art &amp; QA<span class="co">Light &amp; Wonder</span></h3><span class="yr">2019 – 2021</span></summary>
         <ul><li>Supervised a game-art and multimedia team delivering casino, bonus-game, web and mobile products.</li><li>Built review and defect-prevention practices that caught issues before downstream delivery.</li><li>Contributed to the Innovation Lab, taking slot concepts from ideation to delivery.</li></ul></details>
@@ -433,17 +490,26 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
 <section id="release">
   <div class="wrap">
-    <div class="eyebrow">How I call a release</div>
-    <h2>Go / No-Go <em>board</em></h2>
-    <p class="lede">I make the release call on evidence. Switch on each check to see how a build moves from NO-GO to GO.</p>
-    <div class="gng">
-      <div class="toggles" id="toggles"></div>
-      <div class="lamp" id="lamp" aria-live="polite">
-        <div class="bulb"></div>
-        <div class="verdict" id="verdict">NO-GO</div>
-        <div class="meta" id="meta">0 of 6 checks passed</div>
-        <button class="btn ghost" id="reset" type="button">Reset board</button>
+    <div class="eyebrow">Mini-game · think like a QA lead</div>
+    <h2>Spot the <em>bug</em></h2>
+    <p class="lede">Three screens, five bugs hidden in each. Tap anything that looks wrong before time runs out.</p>
+    <div class="sb">
+      <div>
+        <div class="sb-top">
+          <div class="sb-tabs" id="sbTabs"><button type="button" data-s="0" class="on">Slot game</button><button type="button" data-s="1">Mobile app</button><button type="button" data-s="2">Web page</button></div>
+          <div class="sb-hud" aria-live="polite"><span>Found <b id="sbFound">0</b>/5</span><span>Time <b id="sbTime">40</b>s</span></div>
+        </div>
+        <div class="sb-stage" id="sbStage">
+          <div id="sbScene"></div>
+          <div class="sb-over" id="sbOver"><h3>Spot the bug</h3><p>Five bugs are hiding on each screen. Some are small, some would cost real money. Can you catch them all?</p><button class="btn" id="sbGo" type="button">Start</button></div>
+        </div>
       </div>
+      <aside class="sb-side">
+        <div class="who"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCABwAHADASIAAhEBAxEB/8QAHAAAAQQDAQAAAAAAAAAAAAAABwABBQYCBAgD/8QAPBAAAQMDAgMGBAMGBQUAAAAAAQIDBAAFEQYSITFBBxMUUWFxIjKBkaGxwRUWI0JS8CQzQ2LhU3SSosL/xAAaAQACAwEBAAAAAAAAAAAAAAAAAgEDBQQG/8QAKhEAAwACAQMDAwMFAAAAAAAAAAECAxEhBBJBEyIxUWGxBYHwkaHB0eH/2gAMAwEAAhEDEQA/ACZSpdKapAVNil0p80EDVrSrnBggmVLYYA5lxYTiqP2ga6esrRiW9wIkOktoIAJ4fMr0xyHrx9wxPmvz1FUt9x1ROcFXCgbR0i1q3Tr6ct3y3qH/AHCR+Zpm9X6cdcCEXyApSjgDvxxNcyhO4YTz6nH4GsFnKyFKK9vDdn4celAaOtELQtIWhSVJPIpOQfrTmuW7XqO72JSV2y5SI/XagbkK90nhRQ0b2wsTlIg6i2sSFK2okoRtbV5bh/L78qCNBTFPWIOQCORpxQQPT9KxzT5oAyxSpGkaCRYzVB1j2owdNvrhxmPHS080pVhKPc1cLzLMCwz5gzliOtwY55CSa5ZefVIUVvuKW4s5WrzP50AjZvOo379dVSn20tFa/lSThIJyQM+dRL0taZSlEcgSkHlnz/vyqYtGmJN4fPdA90DxUaszHZfKkLHevpA9smue+oxw9Uzrx9LlyLcooPjQpITghKRx4/MfM1styW9uTjCeJ4fn5+goludkcbw/wvrK8dcYzUe/2SSe6JD6UY6YzVS63E/Je/0/MihqeMyQlQSppOMBROCfXyH0r1dbTGeKHSHFKHUc6lLjo29WUFamu/bB+ZHMVCPuFxorcSVPJI+Ir4ge1dMZJtblnHkxXjerWgtdkmu3X306cuTynCQfBuKOTw5tk+3Ee2KL1cl2yc7bbrEuTCsOxnUup9cHOK6thTGrjb481g7mZDaXEH0IzVhSz3FPTU4oIM6YjjT0qAIPWqijQl6UnmIjmPtXMzERTslDGRxOM10trvP7gXrAyfCq/SghpGwG8XLvHCUMxwFrPUk8gKTJaiXTLsWN5KUoJWkbOxFtyAhIOABmrdGgtIzuxmouA4xCjbQUttoGSScAD1qWhtquCQ4wsLSriCnjWC+eWemXtSSPQxkbuBr1XEQpvHWs/wBnyEetZKYkfKEmlSS8DOm/JETbc0WlJUElJFDDVPZ8ic4t6Hhl3mcDgqi7LtsktlQ41Av7kOqbdTtUOhp03D7p4FanJPbfKOdJNqlQJRjvpCVJODXSugVFfZ7Zd3MRkp+xIoR6+tXdymrgyP4TmW1jyVzB+uDRf0KnboGzcuMZJ4epJrbw36kKjznUYvStyTuKWKfNKrTmM8U1LkKcGgkreqJpfZk2RMYupkRVFxZyEgHIxnoevEEUNdOqXYbbJw06+8l3u3Ud38qk9MjI5HNEq6zP2NeZNwdTvb7lK055DbkY/wDb8KrlnbUrxSnWkNOPSlLU2nkkEJwPtisu89d1TS2kbuLppURcPTfkrkq6G77HJkhEVkHcGiCoH1PLP3rxlvzI472DfX0pPxBKUqbH61ZHdJJu+nIxwEusgtnBIIKSUkfhXmjQ8ZMll1NmWpbQGd0oFKyP6gef1zULLEvXwN6NUk/n92NpnX9xgx1ruLzsxhv5lZ3KT6kczVgf7VoK4Z8APEyCdgTtKcH1z5VTrrpt+3J8OwylEi5u902NxVsB4qxw5AcfpU1qbStvsqbPcI8ZptlpYjSdqdu9tXAKV6hRHH1pW8ba35/n5J7bXC8fz8ECvVuqr1dNiru40jONjeAkD6A5radiNvrS4u+uGSk4JKsYP2ryToZSJRS7GmlO4lLkZ1IUc+YP6VuuaJWJSHG/FJjpPyPEHA8hzP407ywlx+BVgvf/AEh78V3iGLSyQJbjqAlRGUqPHljzomaUmRv2a3aGgpLttZbaWDxB4YznkeIPKqf4FiJeQQ0FJZLKSnONxK9xGR6Y+9Xa1NbbrKWlASjYEnAxxyT+Rp8WbVzELh/JTnwJ47yW+V8f1JY04NN1pVomOZmkKY0qAILVUZL8VAW2VtuJU0vHMA9fccx7VUdNSVrclh10urTKcClqGCeQBx05UQ58XxsQt8M5zgkgH0yKEcWQ7atU3O3LbSVB9YJQeAyc8PvWd1GJ7ql5Njpc09sw38bChBguPgvQZaI63DvU263vbUcYyRwIJwM4P0rznLvkZoqzZc8t2HTn6f8ANQEG9vxUqQMqJOOHWq9cO0GNHu4bfadmrSraG2zgJP6muCJu+EtmjbjH7qekXK02yTMuSLhcnkyXlAttqQnYhpPUJGTzPMk5OB0qxahszUmyrZfSHGlAoUk8uVBqfrW8O3FBh2+5tADKGUA7Crpw25P3rbvutdVybclgWe4RflUVobUePlxTVjw3vkq9aPD4X2Llb5N2iONWmQIU3YNra5C1NrUB5kAgnGOOBmpqVGu/hdvcW+K2ofMl1Tyh7DCRQv8A31ZcjMQ7mw/CuCCHWn3AeB8yPL2q4p1Up62thwYeKeXn6g9RSZJqOWi2HGR6hkZeg3ELSA6rKnUb3TglRKhk/wB8uFXi2AGKpwDAWrgPahpcHXbldrbDSneuRLR8IIBwDuPHpyopMNlmOhCjkjnXZ0kPatmf1+SVLxr7GdKlT9K0zGMqY0sUxoAcEUHO0Bpyx9oJn4yxPaCweQyBtP5A/WjCao+ubY1rSUdNQQhd0hxXbhv/AOmEgAN8Oq8j2wDS1KpaY+OnNJoqumdQNMXMNukqS6rdx47cnzrC0aLh3m6Xa4xZjzbrMnLLja9p48SD6dKHiZ0mGtcRxS21oJCknnnPL8KI3ZXfI7bz9uec2h47kknhnrXDWJwnUmpGeclTNBGstniIg7X25yXMkLUzMJ2Ak8Nq856CtyTZIMSA6tS7w+kJOQt9ttKfXKRmqfq6LqOEpD1klBxs/O2cEp9cGtOxt6zuTqfHzI7EU/NvSneSOgHnSJpz3M620q7ef8EDq3Sj06FLuyJT4jRRllpxW9QGeJ3HjWw9PZgaZgMsOB2QGQConPGpjX9xTatOqgh5DrkgbVblZwPp7UKIj0yfKahQULekPnum208yTz9h/wA00Y6yyt/Uoy5Zw5H2+UEzs8jruurTMJK2bY2rKyObq+A/DcaKvOobSmn29NWFqClQcfUe8kO/1uHmfboPQVM4rvie1aMfJbunQqfGKanpisesHVoZaU66tLbaeJWtQSB7k0Lr92zJRuasULd07+SPyQP1P0oa3vU141A9vuM518Z+FBOEJ9kjgKCdBb1l2oQbXFVFsb7U2c4Md8n4m2fXP8yvTl5+VQ/YNc1K7VnjJdU4/OhOjes5KlhSVnj54BoV7c1K6Wvi9M6utd5Rn/ByErWB1RyWP/EmpJDF2u9k6HFPXy1M7Uq+JzYP8o9cj+n8vagWWLhZJe4JKSPLjXc7DrMuMh1pQcZdQFIVzCkkZH4Ghdr3slYnJdn2Ngd5xUuHyCvVvyP+3l5Yql7n45RfNTfFPT+v+wAt60uHcrQqSs7hk7jxBxjjWEXWM1llSPELWVcQSeXr71tT9KM+IcbVvYeSSlSHElKkkdCDWpG0eFOYckJ2+Q51X34jo9LqN8EbLucy8utsguPLJ2o45J/vNFPs40S9BsOoLso4nRra7sdH+k4U5SE+20n1rS01pXvpjMK1RQ9LdOAo9PMk9AOZNH+Np6NYdEyLclQXmO4XnSMd4ooOVe3QDoBRF+o/b8IXLjWKfe90/wCwNNG6+t+p4LaX3WotyCR3jClbQs/1IzzHpzFW8jzGK5NB+BA/2gj7VYLFrzUOnylMW4LcYH+g/wDxEfY8R9CK6Ti0dIYp+VDixdstrmBLV3iuQHTwLjeXGz/9D8av0C5QbrGEiBLZlNH+ZpYUB7+X1oIP/9k=" alt="Elamaran Sugumar"><div><b>Elamaran</b><span>QA Lead</span></div></div>
+        <blockquote>This is my day job: noticing what's off before players do.</blockquote>
+        <div class="sb-lbl">Bugs you've found</div>
+        <ul class="sb-found" id="sbList"><li style="color:var(--mute)" class="empty">None yet</li></ul>
+      </aside>
     </div>
   </div>
 </section>
@@ -484,7 +550,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   <div class="wrap contact">
     <div>
       <div class="eyebrow">Contact</div>
-      <h2>Let's talk <em>QA</em></h2>
+      <h2>Let's <em>talk</em></h2>
       <div class="who"><img src="data:image/jpeg;base64,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" alt="Elamaran Sugumar, QA Lead"><div><b>Elamaran Sugumar</b><span>QA Lead · Chennai, India, open to Bengaluru</span></div></div>
       <div class="lines">
         <div><span class="k">EMAIL</span>elawmaran@zohomail.in</div>
@@ -598,13 +664,67 @@ tb.innerHTML=ops.map(([o,r])=>`<tr><td>${sp(o)}</td><td>${sp(r)}</td><td class="
 const bio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting||RM)return;[...tb.querySelectorAll('tr')].forEach((tr,ri)=>tr.querySelectorAll('.ch').forEach((c,ci)=>{c.style.animationDelay=(ri*60+ci*18)+'ms'}));tb.classList.add('flip');bio.disconnect()}),{threshold:.3});
 bio.observe($('#board'));
 
-/* go / no-go */
-const checks=["Critical defects closed","Regression passed","Integration verified","Player-facing UI validated","Risks documented","Stakeholders aligned"];
-const tg=$('#toggles');tg.innerHTML=checks.map((c,i)=>`<button class="tg" type="button" role="switch" aria-checked="false" id="tg${i}">${c}<span class="sw"></span></button>`).join('');
-const btns=[...tg.querySelectorAll('.tg')];
-function upd(){const on=btns.filter(b=>b.getAttribute('aria-checked')==='true').length;const go=on===btns.length;$('#lamp').classList.toggle('go',go);$('#verdict').textContent=go?'GO':'NO-GO';$('#meta').textContent=go?'All checks passed · release ready':`${on} of ${btns.length} checks passed`;if(go&&!RM)coinBurst($('#lamp'))}
-btns.forEach(b=>b.addEventListener('click',()=>{b.setAttribute('aria-checked',b.getAttribute('aria-checked')==='true'?'false':'true');upd()}));
-$('#reset').addEventListener('click',()=>{btns.forEach(b=>b.setAttribute('aria-checked','false'));upd()});
+/* spot the bug */
+(()=>{
+const SCENES=[
+`<div class="m-slot sb-scene">
+  <div class="ttl">LUCKY 7s</div>
+  <div class="m-reels"><div>7</div><div>7</div><div class="sb-bug tilt" data-b="Minor|Reel symbol out of line">7</div></div>
+  <div class="m-win sb-bug" data-b="Blocker|Win shows 150, but the paytable says 3×7 pays 100">WIN 150</div>
+  <div class="m-row"><div><div class="lab sb-bug" data-b="Minor|Typo: BALNACE">BALNACE</div><span class="sb-bug" data-b="Blocker|Balance is negative">-$20.00</span></div><div><div class="lab">BET</div>$10.00</div><button class="m-spin sb-bug" type="button" data-b="Major|Button text cut off: SPN">SPN</button></div>
+  <div class="m-pay">PAYTABLE · 7 7 7 pays 100</div>
+</div>`,
+`<div class="m-phone sb-scene"><div class="m-screen">
+  <div class="m-bar"><span class="sb-bug" data-b="Minor|Back arrow points the wrong way">→</span> Rewards<span class="m-bell">🔔<i class="sb-bug" data-b="Major|Notification count shows -1">-1</i></span></div>
+  <div class="m-card"><h4>Daily bonus</h4><p>Next bonus: <span class="sb-bug" data-b="Major|31 February doesn't exist">31 Feb 2026</span></p></div>
+  <div class="m-card m-dark sb-bug" data-b="Major|Dark text on a dark card: unreadable">Claim your free spins today</div>
+  <div class="m-card"><h4>Points</h4><p>1,250 points · Gold tier</p></div>
+  <button class="m-btn sb-bug" type="button" data-b="Minor|Button text cut off">Continue playing your favourite games</button>
+</div></div>`,
+`<div class="m-web sb-scene">
+  <div class="m-chrome"><i></i><i></i><i></i><span>https://play.example.com</span></div>
+  <div class="m-nav">PlayHub <span>Games</span><span>Rewards</span><input class="sb-bug" data-b="Minor|Typo in search: Seach" placeholder="Seach games" readonly></div>
+  <div class="m-hero"><div><h4>New games every week</h4><p>Play on web, mobile and tablet.</p><span class="sb-bug" style="font:700 13px var(--body);color:#2E6BE6" data-b="Minor|Inconsistent labels: Sign in vs Log in">Sign in</span> · <span style="font:700 13px var(--body);color:#2E6BE6">Log in</span></div><div class="m-img sb-bug" data-b="Major|Broken image">⚠ image<br>not found</div></div>
+  <div class="m-price"><div>Monthly<b>$9.99</b></div><div class="sb-bug" data-b="Major|'Save 20%' but yearly costs more than 12 × monthly">Yearly · Save 20%<b>$129.99</b></div></div>
+  <div class="m-foot"><span class="sb-bug" data-b="Minor|Copyright year is wrong: 2062">© 2062 PlayHub</span><span>Terms · Privacy</span></div>
+</div>`];
+const $=id=>document.getElementById(id);
+const stage=$('sbStage'),scene=$('sbScene'),over=$('sbOver');
+let s=0,found=0,left=40,timer=0,playing=false,total=0,doneS=[false,false,false];
+function pin(el,txt,miss){const r=stage.getBoundingClientRect(),q=el.getBoundingClientRect();const p=document.createElement('div');p.className='sb-pin'+(miss?' miss':'');const [sev,msg]=txt.split('|');p.innerHTML=`<b>${miss?'Missed · ':''}${sev}</b>${msg}`;
+  let x=q.left-r.left, y=q.bottom-r.top+6; if(x+210>r.width) x=r.width-216; if(y+50>r.height) y=q.top-r.top-52; p.style.left=Math.max(6,x)+'px'; p.style.top=Math.max(6,y)+'px'; stage.appendChild(p); return p;}
+function list(txt){const ul=$('sbList'); ul.querySelector('.empty')?.remove(); const li=document.createElement('li'); li.textContent=txt.split('|')[1]; ul.prepend(li);}
+function load(i){
+  s=i; found=0; left=40; scene.innerHTML=SCENES[i]; stage.querySelectorAll('.sb-pin,.sb-x').forEach(x=>x.remove());
+  document.querySelectorAll('#sbTabs button').forEach((b,j)=>b.classList.toggle('on',j===i));
+  $('sbFound').textContent=0; $('sbTime').textContent=left;
+  scene.querySelector('.sb-scene').addEventListener('pointerdown',e=>{ if(!playing) return; e.preventDefault();
+    const bug=e.target.closest('.sb-bug');
+    if(bug&&!bug.classList.contains('found')){ bug.classList.add('found'); found++; total++; $('sbFound').textContent=found; const p=pin(bug,bug.dataset.b); setTimeout(()=>p.remove(),2200); list(bug.dataset.b); if(found===5) finish(); }
+    else if(!bug){ const r=stage.getBoundingClientRect(); const x=document.createElement('div'); x.className='sb-x'; x.textContent='✕'; x.style.left=(e.clientX-r.left-8)+'px'; x.style.top=(e.clientY-r.top-14)+'px'; stage.appendChild(x); setTimeout(()=>x.remove(),600); left=Math.max(0,left-2); $('sbTime').textContent=left; }
+  });
+}
+function play(i){ load(i); over.style.display='none'; playing=true; clearInterval(timer);
+  timer=setInterval(()=>{left--; $('sbTime').textContent=Math.max(0,left); if(left<=0) finish();},1000); }
+function finish(){
+  if(!playing) return; playing=false; clearInterval(timer); doneS[s]=true;
+  document.querySelectorAll('#sbTabs button')[s].classList.add('done');
+  const missed=[...scene.querySelectorAll('.sb-bug:not(.found)')]; missed.forEach(m=>{m.classList.add('missed');});
+  const nextI=doneS.findIndex(d=>!d);
+  setTimeout(()=>{
+    const all=nextI<0;
+    const line= found===5?'All five. That\'s a clean screen.':found>=3?`${5-found} slipped through. Those are the ones players find first.`:'Tricky, right? This is why release testing takes a trained eye.';
+    over.innerHTML= all
+      ? `<h3>All screens tested</h3><div class="big">${total}/15</div><p>${total===15?'Perfect score. You\'d make a great QA lead.':total>=11?'Sharp eye. A few made it to players.':'Bugs hide in plain sight. Catching them is my job.'}</p><button class="btn" id="sbAgain" type="button">Play again</button>`
+      : `<h3>${found}/5 found</h3><p>${line}${missed.length?' Missed bugs are outlined in red.':''}</p><div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="btn" id="sbNext" type="button">Next screen: ${['Slot game','Mobile app','Web page'][nextI]}</button><button class="btn ghost" id="sbLook" type="button">Show the missed bugs</button></div>`;
+    over.style.display='flex';
+    if(all){ $('sbAgain').addEventListener('click',()=>{total=0;doneS=[false,false,false];document.querySelectorAll('#sbTabs button').forEach(b=>b.classList.remove('done'));$('sbList').innerHTML='<li style="color:var(--mute)" class="empty">None yet</li>';play(0);}); if(total>=12&&!RM) coinBurst(stage); }
+    else { $('sbNext').addEventListener('click',()=>play(nextI)); $('sbLook').addEventListener('click',()=>{ over.style.display='none'; missed.forEach((m,k)=>setTimeout(()=>pin(m,m.dataset.b,true),k*120)); const b=document.createElement('button'); b.className='btn'; b.type='button'; b.textContent='Next screen'; b.style.cssText='position:absolute;right:14px;bottom:14px;z-index:6'; b.addEventListener('click',()=>{b.remove();play(nextI)}); stage.appendChild(b); }); }
+  }, missed.length?500:300);
+}
+document.querySelectorAll('#sbTabs button').forEach(b=>b.addEventListener('click',()=>{ const i=+b.dataset.s; if(playing){ return; } load(i); over.innerHTML=`<h3>${['Slot game','Mobile app','Web page'][i]}</h3><p>Five bugs are hiding. Tap them before time runs out. Wrong taps cost 2 seconds.</p><button class="btn" id="sbGo" type="button">Start</button>`; over.style.display='flex'; $('sbGo').addEventListener('click',()=>play(i)); }));
+load(0); $('sbGo').addEventListener('click',()=>play(0));
+})();
 
 /* expertise cards */
 const ex=[["♠","Functional & Manual","Thorough functional testing of game flows, features and edge cases, with clear and reproducible evidence."],["♥","Regression & Integration","Regression strategy and integration testing that protect existing behavior as new content and systems ship."],["♦","Casino & Slot QA","Slot, bonus-game and casino-system testing: bonus engine, machine screens, slot data and player data platforms."],["♣","Gameplay & Player Experience","Controls, feedback, pacing, UI/UX and visual polish validated the way players see them."],["♠","Web & Mobile Game QA","Quality across web, mobile and interactive application builds."],["♥","Defect Management","Clear reporting, triage, root cause analysis and tracking, with severity agreed across teams."],["♦","QA Leadership","Leading and mentoring QA teams, setting priorities, reporting risk and building a culture of quality."],["♣","Automation & AI-Assisted QA","Python, Playwright and Cypress automation plus AI-assisted test design to speed up feedback."]];
